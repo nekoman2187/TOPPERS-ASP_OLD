@@ -1,9 +1,10 @@
 /*
- *  TOPPERS Software
- *      Toyohashi Open Platform for Embedded Real-Time Systems
- * 
+ *  TOPPERS/ASP Kernel
+ *      Toyohashi Open Platform for Embedded Real-Time Systems/
+ *      Advanced Standard Profile Kernel
+ *
  *  Copyright (C) 2008-2010 by Witz Corporation, JAPAN
- *  Copyright (C) 2015 by Hisashi Hata, JAPAN
+ *  Copyright (C) 2022 wolfSSL Inc.
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
@@ -27,86 +28,53 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
- * 
+ *
  */
 
 /*
- *		sil.hのプロセッサ依存部（RX用）
+ *		プロセッサ依存モジュール（RX72n用）
+ *
+ *  このインクルードファイルは，target_config.h（または，そこからインク
+ *  ルードされるファイル）のみからインクルードされる．他のファイルから
+ *  直接インクルードしてはならない．
  */
 
-#ifndef TOPPERS_PRC_SIL_H
-#define TOPPERS_PRC_SIL_H
 
+#ifndef TOPPERS_RX72n_CONFIG_H
+#define TOPPERS_RX72n_CONFIG_H
+
+#define ARCH_RENESAS_RX72n
+
+/*
+ *  割込み要因数
+ */
+#define	INHNO_MAX	UINT_C( 256 )
+
+
+/*
+ *  割込み制御用定義
+ */
+#define	INVALID_OFFSET				( 0xFFU )
+#define	INTNO_IRQ( intno )			( ( 64U <= ( intno ) ) && ( ( intno ) <= 79U ) )
+#define	INTNO_IRQ_OFFSET( intno )	( ( intno ) - 64U )
+#define	IRQ_MAX						UINT_C( 16 )
 
 #ifndef TOPPERS_MACRO_ONLY
-#include "prc_insn.h"
 
+void set_icu_ipr(INTNO, uint8_t);
 
-/*
- *  全割込み禁止
- */
-Inline uint32_t
-TOPPERS_disint( void )
-{
-	volatile uint32_t	TOPPERS_psw;
-
-	TOPPERS_psw = current_psw();
-	disint();
-
-	return( TOPPERS_psw );
-}
-
+#endif
 
 /*
- *  全割込み許可
+ *  プロセッサ依存モジュール（RX72n用）
  */
-Inline void
-TOPPERS_enaint( uint32_t TOPPERS_psw )
-{
-	if( TOPPERS_psw & PSW_I_MASK ){
-		enaint();
-	}
-}
+#include "rx_gcc/rx_common/prc_config.h"
 
+#endif	/* TOPPERS_RX72n_CONFIG_H */
 
-/*
- *  全割込みロック状態の制御
- */
-#define SIL_PRE_LOC		uint32_t TOPPERS_i_psw;
-#define SIL_LOC_INT()	( ( void )( TOPPERS_i_psw = TOPPERS_disint() ) )
-#define SIL_UNL_INT()	( TOPPERS_enaint( TOPPERS_i_psw ) )
-
-
-/*
- *  エンディアンの反転
- *
- *  本開発環境ではエンディアン変換命令が存在するため,
- *  アーキテクチャ依存部にてマクロを上書きする.
- */
-#define TOPPERS_SIL_REV_ENDIAN_UINT16( data )	\
- 								rev_endian_uint16( data )
-#define TOPPERS_SIL_REV_ENDIAN_UINT32( data )	\
- 								rev_endian_uint32( data )
-
-
-/*
- *  微少時間待ち
- */
-extern void sil_dly_nse( ulong_t dlytim );
-
-#endif /* TOPPERS_MACRO_ONLY */
-
-
-/*
- *  プロセッサのエンディアン
- */
-#define SIL_ENDIAN_LITTLE			/* リトルエンディアン */
-
-
-#endif /* TOPPERS_PRC_SIL_H */

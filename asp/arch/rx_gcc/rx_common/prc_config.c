@@ -59,7 +59,7 @@ bool_t		lock_flag;		/* CPUロックフラグの値を保持する変数 */
 uint32_t	saved_ipl;		/* 割込み優先度レベルを保存する変数 */
 #endif	/* TIPM_LOCK != -15	*/
 
-
+uint32_t	saved_psw;
 /*
  *  プロセッサ依存の初期化
  */

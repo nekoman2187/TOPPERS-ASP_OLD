@@ -37,76 +37,19 @@
  */
 
 /*
- *		sil.hのプロセッサ依存部（RX用）
- */
-
-#ifndef TOPPERS_PRC_SIL_H
-#define TOPPERS_PRC_SIL_H
-
-
-#ifndef TOPPERS_MACRO_ONLY
-#include "prc_insn.h"
-
-
-/*
- *  全割込み禁止
- */
-Inline uint32_t
-TOPPERS_disint( void )
-{
-	volatile uint32_t	TOPPERS_psw;
-
-	TOPPERS_psw = current_psw();
-	disint();
-
-	return( TOPPERS_psw );
-}
-
-
-/*
- *  全割込み許可
- */
-Inline void
-TOPPERS_enaint( uint32_t TOPPERS_psw )
-{
-	if( TOPPERS_psw & PSW_I_MASK ){
-		enaint();
-	}
-}
-
-
-/*
- *  全割込みロック状態の制御
- */
-#define SIL_PRE_LOC		uint32_t TOPPERS_i_psw;
-#define SIL_LOC_INT()	( ( void )( TOPPERS_i_psw = TOPPERS_disint() ) )
-#define SIL_UNL_INT()	( TOPPERS_enaint( TOPPERS_i_psw ) )
-
-
-/*
- *  エンディアンの反転
+ *		t_stddef.hのプロセッサ依存部（RX72n用）from RX62n
  *
- *  本開発環境ではエンディアン変換命令が存在するため,
- *  アーキテクチャ依存部にてマクロを上書きする.
+ *  このインクルードファイルは，target_stddef.h（または，そこからインク
+ *  ルードされるファイル）のみからインクルードされる．他のファイルから
+ *  直接インクルードしてはならない．
  */
-#define TOPPERS_SIL_REV_ENDIAN_UINT16( data )	\
- 								rev_endian_uint16( data )
-#define TOPPERS_SIL_REV_ENDIAN_UINT32( data )	\
- 								rev_endian_uint32( data )
 
+#ifndef TOPPERS_PRC_STDDEF_H
+#define TOPPERS_PRC_STDDEF_H
 
 /*
- *  微少時間待ち
+ *  ターゲットを識別するためのマクロの定義
  */
-extern void sil_dly_nse( ulong_t dlytim );
+#define TOPPERS_RX72N				/* プロセッサ略称 */
 
-#endif /* TOPPERS_MACRO_ONLY */
-
-
-/*
- *  プロセッサのエンディアン
- */
-#define SIL_ENDIAN_LITTLE			/* リトルエンディアン */
-
-
-#endif /* TOPPERS_PRC_SIL_H */
+#endif /* TOPPERS_PRC_STDDEF_H */

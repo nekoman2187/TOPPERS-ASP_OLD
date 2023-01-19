@@ -1,10 +1,12 @@
 /*
- *  TOPPERS Software
- *      Toyohashi Open Platform for Embedded Real-Time Systems
- * 
- *  Copyright (C) 2008-2010 by Witz Corporation, JAPAN
- *  Copyright (C) 2015 by Hisashi Hata, JAPAN
- * 
+ *  TOPPERS/ASP Kernel
+ *      Toyohashi Open Platform for Embedded Real-Time Systems/
+ *      Advanced Standard Profile Kernel
+ *
+ *  Copyright (C) 2010 by Witz Corporation, JAPAN
+ *  Copyright (C) 2016- by Hisashi Hata, JAPAN
+ *  Copyright (C) 2022 wolfSSL Inc.
+ *
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
  *  変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -27,86 +29,28 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
  *  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
  *  の責任を負わない．
- * 
- */
-
-/*
- *		sil.hのプロセッサ依存部（RX用）
- */
-
-#ifndef TOPPERS_PRC_SIL_H
-#define TOPPERS_PRC_SIL_H
-
-
-#ifndef TOPPERS_MACRO_ONLY
-#include "prc_insn.h"
-
-
-/*
- *  全割込み禁止
- */
-Inline uint32_t
-TOPPERS_disint( void )
-{
-	volatile uint32_t	TOPPERS_psw;
-
-	TOPPERS_psw = current_psw();
-	disint();
-
-	return( TOPPERS_psw );
-}
-
-
-/*
- *  全割込み許可
- */
-Inline void
-TOPPERS_enaint( uint32_t TOPPERS_psw )
-{
-	if( TOPPERS_psw & PSW_I_MASK ){
-		enaint();
-	}
-}
-
-
-/*
- *  全割込みロック状態の制御
- */
-#define SIL_PRE_LOC		uint32_t TOPPERS_i_psw;
-#define SIL_LOC_INT()	( ( void )( TOPPERS_i_psw = TOPPERS_disint() ) )
-#define SIL_UNL_INT()	( TOPPERS_enaint( TOPPERS_i_psw ) )
-
-
-/*
- *  エンディアンの反転
  *
- *  本開発環境ではエンディアン変換命令が存在するため,
- *  アーキテクチャ依存部にてマクロを上書きする.
  */
-#define TOPPERS_SIL_REV_ENDIAN_UINT16( data )	\
- 								rev_endian_uint16( data )
-#define TOPPERS_SIL_REV_ENDIAN_UINT32( data )	\
- 								rev_endian_uint32( data )
+#include <kernel.h>
+#include <RX72n.h>
 
+void set_init_moudlestop_setting(){
+    /* power management setting*/
+	/* unlock register access */
+	sil_wrh_mem((void *)(SYSTEM_PRCR_ADDR), SYSTEM_PRKEY | SYSTEM_PRC1);
 
-/*
- *  微少時間待ち
- */
-extern void sil_dly_nse( ulong_t dlytim );
+	//enable RSPI0
+	sil_wrw_mem((void*)SYSTEM_MSTPCRA_ADDR, 0x46FFFFFF); //reset MSTPCRA
+	sil_wrw_mem((void*)SYSTEM_MSTPCRB_ADDR, 0xFFFFFFFF); //reset MSTPCRB
+	sil_wrw_mem((void*)SYSTEM_MSTPCRC_ADDR, 0xFFFF0000); //reset MSTPCRC
 
-#endif /* TOPPERS_MACRO_ONLY */
-
-
-/*
- *  プロセッサのエンディアン
- */
-#define SIL_ENDIAN_LITTLE			/* リトルエンディアン */
-
-
-#endif /* TOPPERS_PRC_SIL_H */
+	//lock register access
+	sil_wrh_mem((void *)(SYSTEM_PRCR_ADDR), SYSTEM_PRKEY );
+	/* end power management setting */
+}

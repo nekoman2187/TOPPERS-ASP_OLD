@@ -4,7 +4,6 @@ $      Toyohashi Open Platform for Embedded Real-Time Systems/
 $      Advanced Standard Profile Kernel
 $ 
 $  Copyright (C) 2008-2010 by Witz Corporation, JAPAN
-$  Copyright (C) 2015-  by Hisashi Hata, JAPAN
 $ 
 $  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
 $  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
@@ -37,20 +36,10 @@ $  の責任を負わない．
 $ 
 
 $ 
-$ 		パス3のプロセッサ依存テンプレート（RX用）
+$     パス3のターゲット依存テンプレート（RX72N用）
 $ 
 
 $ 
-$  チェック方法の指定
+$  パス3のSH4A依存のテンプレートのインクルード
 $ 
-$CHECK_FUNC_ALIGN = 1$
-$CHECK_FUNC_NONNULL = 1$
-$CHECK_STACK_ALIGN = 4$
-$CHECK_STACK_NONNULL = 1$
-$CHECK_MPF_ALIGN = 4$
-$CHECK_MPF_NONNULL = 1$
-
-$ 
-$  標準テンプレートファイルのインクルード
-$ 
-$INCLUDE "kernel/kernel_check.tf"$
+$INCLUDE"prc_check.tf"$

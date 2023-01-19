@@ -1,9 +1,15 @@
 /*
- *  TOPPERS Software
- *      Toyohashi Open Platform for Embedded Real-Time Systems
+ *  TOPPERS/ASP Kernel
+ *      Toyohashi Open Platform for Embedded Real-Time Systems/
+ *      Advanced Standard Profile Kernel
  * 
+ *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
+ *                              Toyohashi Univ. of Technology, JAPAN
+ *  Copyright (C) 2003-2004 by Naoki Saito
+ *             Nagoya Municipal Industrial Research Institute, JAPAN
+ *  Copyright (C) 2003-2004 by Platform Development Center
+ *                                          RICOH COMPANY,LTD. JAPAN
  *  Copyright (C) 2008-2010 by Witz Corporation, JAPAN
- *  Copyright (C) 2015 by Hisashi Hata, JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
@@ -37,76 +43,78 @@
  */
 
 /*
- *		sil.hのプロセッサ依存部（RX用）
- */
-
-#ifndef TOPPERS_PRC_SIL_H
-#define TOPPERS_PRC_SIL_H
-
-
-#ifndef TOPPERS_MACRO_ONLY
-#include "prc_insn.h"
-
-
-/*
- *  全割込み禁止
- */
-Inline uint32_t
-TOPPERS_disint( void )
-{
-	volatile uint32_t	TOPPERS_psw;
-
-	TOPPERS_psw = current_psw();
-	disint();
-
-	return( TOPPERS_psw );
-}
-
-
-/*
- *  全割込み許可
- */
-Inline void
-TOPPERS_enaint( uint32_t TOPPERS_psw )
-{
-	if( TOPPERS_psw & PSW_I_MASK ){
-		enaint();
-	}
-}
-
-
-/*
- *  全割込みロック状態の制御
- */
-#define SIL_PRE_LOC		uint32_t TOPPERS_i_psw;
-#define SIL_LOC_INT()	( ( void )( TOPPERS_i_psw = TOPPERS_disint() ) )
-#define SIL_UNL_INT()	( TOPPERS_enaint( TOPPERS_i_psw ) )
-
-
-/*
- *  エンディアンの反転
+ *		システムサービスのターゲット依存部（RX72N用）
  *
- *  本開発環境ではエンディアン変換命令が存在するため,
- *  アーキテクチャ依存部にてマクロを上書きする.
+ *  システムサービスのターゲット依存部のインクルードファイル．このファ
+ *  イルの内容は，コンポーネント記述ファイルに記述され，このファイルは
+ *  無くなる見込み．
  */
-#define TOPPERS_SIL_REV_ENDIAN_UINT16( data )	\
- 								rev_endian_uint16( data )
-#define TOPPERS_SIL_REV_ENDIAN_UINT32( data )	\
- 								rev_endian_uint32( data )
+
+#ifndef TOPPERS_TARGET_SYSSVC_H
+#define TOPPERS_TARGET_SYSSVC_H
 
 
 /*
- *  微少時間待ち
+ *  プロセッサ依存の定義
  */
-extern void sil_dly_nse( ulong_t dlytim );
-
-#endif /* TOPPERS_MACRO_ONLY */
+#include "prc_syssvc.h"
 
 
 /*
- *  プロセッサのエンディアン
+ *  トレースログに関する設定
  */
-#define SIL_ENDIAN_LITTLE			/* リトルエンディアン */
+#ifdef TOPPERS_ENABLE_TRACE
+#include "logtrace/trace_config.h"
+#endif /* TOPPERS_ENABLE_TRACE */
 
 
-#endif /* TOPPERS_PRC_SIL_H */
+/*
+ *  ボード依存情報の読み込み
+ */
+#include "target_board.h"
+
+
+/*
+ *  起動メッセージのターゲットシステム名
+ */
+#define	TARGET_NAME	"RX72N"
+
+
+/*
+ *  システムログの低レベル出力のための文字出力
+ *
+ *  ターゲット依存の方法で，文字cを表示/出力/保存する．
+ */
+extern void	target_fput_log( char c );
+
+
+/*
+ *  起動メッセージにターゲット依存部の著作権表示を
+ *  追加するためのマクロ．
+ */
+#ifdef PRC_COPYRIGHT
+#define	TARGET_COPYRIGHT	PRC_COPYRIGHT
+#endif /* PRC_COPYRIGHT */
+
+
+/*
+ *  シリアルポート数の定義
+ */
+#define	TNUM_PORT			UINT_C( 1 )
+
+
+/*
+ *  使用するシリアルポートID
+ */
+#define	SIO_PORTID			UINT_C( 1 )
+
+#define LOGTASK_PORTID		SIO_PORTID
+
+
+/*
+ *  システムログタスク関連の定数の定義
+ *
+ *  デフォルト値の通り．
+ */
+
+#endif /* TOPPERS_TARGET_SYSSVC_H */

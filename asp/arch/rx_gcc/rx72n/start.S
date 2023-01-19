@@ -3,7 +3,13 @@
 ;*      Toyohashi Open Platform for Embedded Real-Time Systems/
 ;*      Advanced Standard Profile Kernel
 ;* 
-;*  Copyright (C) 2010 by Witz Corporation, JAPAN
+;*  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
+;*                              Toyohashi Univ. of Technology, JAPAN
+;*  Copyright (C) 2005,2006 by Embedded and Real-Time Systems Laboratory
+;*              Graduate School of Information Science, Nagoya Univ., JAPAN
+;*  Copyright (C) 2008-2010 by Witz Corporation, JAPAN
+;*  Copyright (C) 2015 by Hisashi Hata, JAPAN
+;*  Copyright (C) 2022 wolfSSL Inc.
 ;* 
 ;*  上記著作権者は，Free Software Foundation によって公表されている 
 ;*  GNU General Public License の Version 2 に記述されている条件か，以
@@ -32,22 +38,57 @@
 ;*  かなる損害に関しても，その責任を負わない．
 ;* 
 
-   .text
+#if 1
+#define TOPPERS_MACRO_ONLY
+#define UINT_C(val)		(val)		/* uint_t型の定数を作るマクロ */
+#define ULONG_C(val)	(val)		/* ulong_t型の定数を作るマクロ */
+#define CAST(type, val)	(val)		/* 型キャストを行うマクロ */
+#include "kernel_impl.h"
 
-	.global	_trigger_cpu_exception
+.text
+.balign 4
+.global _startw
+		
+_startw:
 
-_trigger_cpu_exception:
+	;  可変ベクタテーブルの設定
 	;
-	;  CPU例外の発生
-	;
-	;  ゼロ割り算を行うことで, 浮動小数点例外を
-	;  発生させる.
-	;
-	mvtc	#0x00001000, fpsw
-	mov.l	#1, r5
-	fdiv	#0, r5
-	mvtc	#0x00000000, fpsw
-	rts
+	mvtc	#__vvector_table, intb			; ベクタテーブルの設定
 
-	.end
+	;
+	;  ハードウェア固有の初期化ルーチンの呼出し
+	;
+	mov.l	#_hardware_init_hook, r5
+	cmp		#0, r5
+	beq.b	init_D
+	jsr		r5
 
+	;
+	;  初期値あり変数領域の初期化
+	;
+init_D:
+	;
+	;  初期値なし変数領域の初期化
+	;
+clear_B:
+
+	;
+	;  software_init_hook を呼出し（0 でない場合）
+	;
+	;  ソフトウェア環境（特にライブラリ）に依存して必要な初期化処理
+	;  がある場合は，software_init_hook という関数を用意すればよい.
+	;
+	mov.l	#_software_init_hook, r5
+	cmp		#0, r5
+	beq.b	kernel_link
+	jsr		r5
+
+	;
+	;  カーネルスタート
+	;
+kernel_link:
+	bra.a	_sta_ker					; --> _sta_ker()
+
+
+.end
+#endif

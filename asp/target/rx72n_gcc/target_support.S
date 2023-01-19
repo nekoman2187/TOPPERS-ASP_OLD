@@ -3,7 +3,14 @@
 ;*      Toyohashi Open Platform for Embedded Real-Time Systems/
 ;*      Advanced Standard Profile Kernel
 ;* 
-;*  Copyright (C) 2010 by Witz Corporation, JAPAN
+;*  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
+;*                              Toyohashi Univ. of Technology, JAPAN
+;*  Copyright (C) 2001 by OAKS16KIT support
+;*  Copyright (C) 2003-2004 by Naoki Saito
+;*             Nagoya Municipal Industrial Research Institute, JAPAN
+;*  Copyright (C) 2003-2004 by Ryosuke Takeuchi
+;*               Platform Development Center RICOH COMPANY,LTD. JAPAN
+;*  Copyright (C) 2008-2010 by Witz Corporation, JAPAN
 ;* 
 ;*  上記著作権者は，Free Software Foundation によって公表されている 
 ;*  GNU General Public License の Version 2 に記述されている条件か，以
@@ -30,24 +37,58 @@
 ;*  本ソフトウェアに関して，その適用可能性も含めて，いかなる保証も行わ
 ;*  ない．また，本ソフトウェアの利用により直接的または間接的に生じたい
 ;*  かなる損害に関しても，その責任を負わない．
-;* 
 
-   .text
+.text
+.balign 4
+	
 
-	.global	_trigger_cpu_exception
+;
+;  レジスタ定義
+;
+.equ SCKCR,	0x080020
 
-_trigger_cpu_exception:
+;
+;  定義値
+;
+.equ CLOCK_VAL,	0x00020100
+
+
+.global	_hardware_init_hook
+.global	_software_init_hook
+
+
+_hardware_init_hook:
 	;
-	;  CPU例外の発生
+	;  動作モード設定
 	;
-	;  ゼロ割り算を行うことで, 浮動小数点例外を
-	;  発生させる.
+	;  動作モードはボード上の端子によって決定されるため,
+	;  ここでは特別設定しない.
+	;  ただし, リトルエンディアン/シングルチップモード
+	;  であることを前提とする.
 	;
-	mvtc	#0x00001000, fpsw
-	mov.l	#1, r5
-	fdiv	#0, r5
-	mvtc	#0x00000000, fpsw
+	;  またリセット後, 内蔵ROM：有効, 内蔵RAM：有効, 外部バス：無効
+	;  である.
+	;
+
+	;
+	;  モジュールストップ
+	;
+	;  リセット後, 動作している内蔵周辺モジュールはDMAC, DTC,
+	;  内蔵RAMのみである.
+	;  それ以外の内蔵周辺モジュールに関しては使用する側で
+	;  設定すること.
+	;
+
 	rts
 
-	.end
+
+_software_init_hook:
+	;
+	;  本コンパイラではweak definitionの機能が無いため,
+	;  特に必要な処理はないが, 必ず呼び出すこととする.
+	;
+	rts
+
+
+.end
 

@@ -9,6 +9,8 @@
 #undef intnest
 #undef lock_flag
 #undef saved_ipl
+#undef saved_psw
+
 #undef prc_initialize
 #undef prc_terminate
 #undef x_config_int
@@ -47,6 +49,8 @@
 #undef _intnest
 #undef _lock_flag
 #undef _saved_ipl
+#undef _saved_psw
+
 #undef _prc_initialize
 #undef _prc_terminate
 #undef _x_config_int

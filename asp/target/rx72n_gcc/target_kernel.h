@@ -1,9 +1,15 @@
 /*
- *  TOPPERS Software
- *      Toyohashi Open Platform for Embedded Real-Time Systems
+ *  TOPPERS/ASP Kernel
+ *      Toyohashi Open Platform for Embedded Real-Time Systems/
+ *      Advanced Standard Profile Kernel
  * 
+ *  Copyright (C) 2000-2003 by Embedded and Real-Time Systems Laboratory
+ *                              Toyohashi Univ. of Technology, JAPAN
+ *  Copyright (C) 2003-2004 by Naoki Saito
+ *             Nagoya Municipal Industrial Research Institute, JAPAN
+ *  Copyright (C) 2003-2004 by Platform Development Center
+ *                                          RICOH COMPANY,LTD. JAPAN
  *  Copyright (C) 2008-2010 by Witz Corporation, JAPAN
- *  Copyright (C) 2015 by Hisashi Hata, JAPAN
  * 
  *  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
  *  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
@@ -37,76 +43,32 @@
  */
 
 /*
- *		sil.hのプロセッサ依存部（RX用）
+ *  このインクルードファイルは，kernel.hでインクルードされる．他のファ
+ *  イルから直接インクルードすることはない．このファイルをインクルード
+ *  する前に，t_stddef.hがインクルードされるので，それらに依存してもよ
+ *  い．
  */
 
-#ifndef TOPPERS_PRC_SIL_H
-#define TOPPERS_PRC_SIL_H
-
-
-#ifndef TOPPERS_MACRO_ONLY
-#include "prc_insn.h"
+#ifndef TOPPERS_TARGET_KERNEL_H
+#define TOPPERS_TARGET_KERNEL_H
 
 
 /*
- *  全割込み禁止
+ *  プロセッサで共通な定義
  */
-Inline uint32_t
-TOPPERS_disint( void )
-{
-	volatile uint32_t	TOPPERS_psw;
-
-	TOPPERS_psw = current_psw();
-	disint();
-
-	return( TOPPERS_psw );
-}
+#include "prc_kernel.h"
 
 
 /*
- *  全割込み許可
+ *  サポートする機能の定義
  */
-Inline void
-TOPPERS_enaint( uint32_t TOPPERS_psw )
-{
-	if( TOPPERS_psw & PSW_I_MASK ){
-		enaint();
-	}
-}
+#define	TOPPERS_TARGET_SUPPORT_GET_UTM		/* get_utmをサポートする */
 
 
 /*
- *  全割込みロック状態の制御
+ *  タイムティックの定義
  */
-#define SIL_PRE_LOC		uint32_t TOPPERS_i_psw;
-#define SIL_LOC_INT()	( ( void )( TOPPERS_i_psw = TOPPERS_disint() ) )
-#define SIL_UNL_INT()	( TOPPERS_enaint( TOPPERS_i_psw ) )
+#define	TIC_NUME		( 1U )		/* タイムティックの周期の分子 */
+#define	TIC_DENO		( 1U )		/* タイムティックの周期の分母 */
 
-
-/*
- *  エンディアンの反転
- *
- *  本開発環境ではエンディアン変換命令が存在するため,
- *  アーキテクチャ依存部にてマクロを上書きする.
- */
-#define TOPPERS_SIL_REV_ENDIAN_UINT16( data )	\
- 								rev_endian_uint16( data )
-#define TOPPERS_SIL_REV_ENDIAN_UINT32( data )	\
- 								rev_endian_uint32( data )
-
-
-/*
- *  微少時間待ち
- */
-extern void sil_dly_nse( ulong_t dlytim );
-
-#endif /* TOPPERS_MACRO_ONLY */
-
-
-/*
- *  プロセッサのエンディアン
- */
-#define SIL_ENDIAN_LITTLE			/* リトルエンディアン */
-
-
-#endif /* TOPPERS_PRC_SIL_H */
+#endif /* TOPPERS_TARGET_KERNEL_H */

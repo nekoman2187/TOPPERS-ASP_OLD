@@ -10,6 +10,8 @@
 ;
 ;   Copyright (C) 2010 by Witz Corporation, JAPAN
 ;   Copyright (C) 2015-  by Hisashi Hata, JAPAN
+;   Copyright (C) 2022 wolfSSL Inc.
+;
 ;   上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
 ;   ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
 ;   変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -89,6 +91,9 @@
 ;  構造体アクセスのオフセット定義
 ;
 #define TOPPERS_MACRO_ONLY
+; RENESAS RX72N BSP使用の場合
+#define RENESAS_RX72N_BSP
+
 #include "offset.h"
 #include "asm_config.inc"
 
@@ -99,6 +104,7 @@
 ;
 
 	.extern	__kernel_istkpt
+    .extern _istack
 
 	.extern	__kernel_p_runtsk
 	.extern	__kernel_p_schedtsk
@@ -378,8 +384,12 @@ dispatcher:
 ;  スクディスパッチの防止という2つの意味がある．
 ;
 dispatcher_pre_idle:
+#ifdef RENESAS_RX72N_BSP
+    mov.l   #_istack,r0
+#else
 	mov.l	#__kernel_istkpt,r5
 	mov.l	[r5], r0					; 割込み用のスタックへ切替え
+#endif
 	mov.l	#__kernel_intnest, r5
 	mov.w	#1, [r5]					; 非タスクコンテキストに切換え
 .if	TIPM_LOCK <> -15
@@ -421,8 +431,13 @@ __kernel_call_exit_kernel:
 	mov.l	#__kernel_lock_flag, r5		; CPUロック解除状態へ
 	mov.l	#0, [r5]
 .endif
-	mov.l	#__kernel_istkpt, r5
+#ifdef RENESAS_RX72N_BSP
+    mov.l   #_istack,r0
+#else
+	mov.l	#__kernel_istkpt,r5
 	mov.l	[r5], r0					; 割込み用のスタックへ切替え
+#endif
+
 	mov.l	#__kernel_intnest, r5
 	mov.w	#1, [r5]					; 非タスクコンテキストに切換え
 	bsr		__kernel_exit_kernel
@@ -589,8 +604,13 @@ _kernel_interrupt:
 	bnz		interrupt_from_int			; 加算前が0でなければ多重割込み
 						; 初段の割込み
 	mov.l	r0, r3						; スタックポインタを取り出し
-	mov.l	#__kernel_istkpt, r5		; 割込み用のスタックへ切替える
-	mov.l	[r5], r0
+#ifdef RENESAS_RX72N_BSP
+    mov.l   #_istack,r0
+#else
+	mov.l	#__kernel_istkpt,r5
+	mov.l	[r5], r0					; 割込み用のスタックへ切替え
+#endif
+
 	push.l	r3							; タスクスタックを保持
 interrupt_from_int:		; 多重割込み
 	setpsw	i							; 割込み許可(CPUロック解除状態)
@@ -753,8 +773,13 @@ _kernel_exception:
 	cmp		#1, r4						; 多重割り込みかどうか
 	bnz		exception_from_int			; 加算前が0でなければ多重割込み
 						; 初段の割込み
-	mov.l	#__kernel_istkpt, r5		; 割込み用のスタックへ切替える
-	mov.l	[r5], r0
+#ifdef RENESAS_RX72N_BSP
+    mov.l   #_istack,r0
+#else
+	mov.l	#__kernel_istkpt,r5
+	mov.l	[r5], r0					; 割込み用のスタックへ切替え
+#endif
+
 	push.l	r3							; タスクスタックを保持
 exception_from_int:		; 多重割込み
 	mov.l	EXC_GET_PSW_OFFSET[r3], r5
@@ -802,8 +827,13 @@ exception_nonkernel:
 	cmp		#1, r4						; 多重割り込みかどうか
 	bnz		exception_from_nonkernelint	; 加算前が0でなければ多重割込み
 						; 初段の割込み
-	mov.l	#__kernel_istkpt, r5		; 割込み用のスタックへ切替える
-	mov.l	[r5], r0
+#ifdef RENESAS_RX72N_BSP
+    mov.l   #_istack,r0
+#else
+	mov.l	#__kernel_istkpt,r5
+	mov.l	[r5], r0					; 割込み用のスタックへ切替え
+#endif
+
 	push.l	r3							; タスクスタックを保持
 exception_from_nonkernelint:	; 多重割込み
 	mov.l	EXC_GET_PSW_OFFSET[r3], r5

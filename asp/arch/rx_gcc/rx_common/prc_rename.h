@@ -9,6 +9,7 @@
 #define intnest						_kernel_intnest
 #define lock_flag					_kernel_lock_flag
 #define saved_ipl					_kernel_saved_ipl
+#define saved_psw					_kernel_saved_psw
 #define prc_initialize				_kernel_prc_initialize
 #define prc_terminate				_kernel_prc_terminate
 #define x_config_int				_kernel_x_config_int
@@ -39,6 +40,8 @@
 #define _intnest					__kernel_intnest
 #define _lock_flag					__kernel_lock_flag
 #define _saved_ipl					__kernel_saved_ipl
+#define _saved_psw					__kernel_saved_psw
+
 #define _prc_initialize				__kernel_prc_initialize
 #define _prc_terminate				__kernel_prc_terminate
 #define _x_config_int				__kernel_x_config_int

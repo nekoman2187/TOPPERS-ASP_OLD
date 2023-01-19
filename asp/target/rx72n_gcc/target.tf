@@ -4,8 +4,7 @@ $      Toyohashi Open Platform for Embedded Real-Time Systems/
 $      Advanced Standard Profile Kernel
 $ 
 $  Copyright (C) 2008-2010 by Witz Corporation, JAPAN
-$  Copyright (C) 2015-  by Hisashi Hata, JAPAN
-$ 
+$  Copyright (C) 2022 wolfSSL Inc.
 $  上記著作権者は，以下の(1)〜(4)の条件を満たす場合に限り，本ソフトウェ
 $  ア（本ソフトウェアを改変したものを含む．以下同じ）を使用・複製・改
 $  変・再配布（以下，利用と呼ぶ）することを無償で許諾する．
@@ -35,22 +34,23 @@ $  に対する適合性も含めて，いかなる保証も行わない．ま�
 $  アの利用により直接的または間接的に生じたいかなる損害に関しても，そ
 $  の責任を負わない．
 $ 
-
-$ 
-$ 		パス3のプロセッサ依存テンプレート（RX用）
 $ 
 
 $ 
-$  チェック方法の指定
+$  ターゲット依存テンプレート（RX72N用）
 $ 
-$CHECK_FUNC_ALIGN = 1$
-$CHECK_FUNC_NONNULL = 1$
-$CHECK_STACK_ALIGN = 4$
-$CHECK_STACK_NONNULL = 1$
-$CHECK_MPF_ALIGN = 4$
-$CHECK_MPF_NONNULL = 1$
+
+
+/*$NL$
+$SPC$*  Target-dependent Definitions (RX72N)$NL$
+$SPC$*/$NL$
+$NL$
+
+$INCLUDE "target_asm_config.tf"$
+
 
 $ 
-$  標準テンプレートファイルのインクルード
+$  RX72n依存部の読み込み
 $ 
-$INCLUDE "kernel/kernel_check.tf"$
+$INCLUDE "rx_gcc/rx72n/rx72n.tf"$
+
